@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """ Console Module """
 import cmd
+import os
 import sys
 from models.base_model import BaseModel
 from models.__init__ import storage
@@ -115,16 +116,61 @@ class HBNBCommand(cmd.Cmd):
 
     def do_create(self, args):
         """ Create an object of any class"""
+        values = args.split()
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+        elif values[0] not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+
+        new_instance = HBNBCommand.classes[values[0]]()
+        if len(values) == 1:
+            if os.getenv('HBNB_TYPE_STORAGE') != 'db':
+                storage.new(new_instance)
+                storage.save()
+                print(new_instance.id)
+            else:
+                print("You need at least one argument")
+        else:
+            values_ = values[1:]  # Take everything after class name
+            all_attrs = HBNBCommand.classes[values[0]].__dict__
+            class_attrs = {k: v for k, v in all_attrs.items()}
+
+            # Make a dictionary with @values
+            attrs = {
+                        el[0]: el[1] for el in [
+                                val.split("=") for val in values
+                                ]
+                        if el[0] in class_attrs
+                    }
+            for k, v in attrs.items():
+                if v[0] == "\"":
+                    if "_" in v:
+                        v = v.replace("_", " ")
+                        if "\"" in v[1:-1]:
+                            v = v[1:-1]
+                            v = v.replace("\"", r"\"")
+                        attrs[k] = v
+                v = v.strip('"')
+                flag = 0
+                keys = ["city_id", "user_id", "place_id", "state_id"]
+                if "." in v and "@" not in v:
+                    attrs[k] = float(v)
+                    flag = 1
+                elif k in keys:
+                    attrs[k] = v
+                    flag = 1
+                elif ord(v[0]) >= 49 and ord(v[0]) <= 57:
+                    attrs[k] = int(v)
+                    flag = 1
+                if flag:
+                    setattr(new_instance, k, attrs[k])
+                else:
+                    setattr(new_instance, k, v)
+            storage.new(new_instance)
+            storage.save()
+            print(new_instance.id)
 
     def help_create(self):
         """ Help information for the create method """
@@ -200,6 +246,11 @@ class HBNBCommand(cmd.Cmd):
     def do_all(self, args):
         """ Shows all objects, or all objects of a class"""
         print_list = []
+
+        if os.getenv('HBNB_TYPE_STORAGE') == 'db':
+            store = storage.all(eval(args))
+        else:
+            store = storage._FileStorage__objects
 
         if args:
             args = args.split(' ')[0]  # remove possible trailing args
@@ -280,10 +331,10 @@ class HBNBCommand(cmd.Cmd):
             args = args.partition(' ')
 
             # if att_name was not quoted arg
-            if not att_name and args[0] is not ' ':
+            if not att_name and args[0] != ' ':
                 att_name = args[0]
             # check for quoted val arg
-            if args[2] and args[2][0] is '\"':
+            if args[2] and args[2][0] == '\"':
                 att_val = args[2][1:args[2].find('\"', 1)]
 
             # if att_val was not quoted arg
