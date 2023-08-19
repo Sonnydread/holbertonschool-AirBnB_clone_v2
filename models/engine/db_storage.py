@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-"""This module defines a class to manage file storage for hbnb clone"""
+"""class to manage file storage for hbnb clone"""
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, scoped_session
 import os
@@ -7,7 +7,7 @@ from models.state import State
 
 
 class DBStorage:
-    """This class manages storage of hbnb models in the
+    """class manages storage of hbnb models in the
     database with sqlalchemy
     """
     __engine = None
@@ -44,7 +44,7 @@ class DBStorage:
                                                       )
 
     def reload(self):
-        """Loads storage dictionary from a database"""
+        """storage dictio from a database"""
         from models.base_model import BaseModel, Base
         from models.user import User
         from models.place import Place
@@ -59,6 +59,6 @@ class DBStorage:
         Base.metadata.create_all(self.__engine)
 
     def close(self):
-        """call remove() method on the private session attribute
+        """remove method on the private session attribute
         (self.__session)"""
         self.__session.remove()
