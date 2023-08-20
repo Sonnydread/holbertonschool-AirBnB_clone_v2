@@ -1,6 +1,14 @@
 #!/usr/bin/python3
 """This module defines a class to manage file storage for hbnb clone"""
 import json
+from models.amenity import Amenity
+from models.city import City
+from models.place import Place
+from models.review import Review
+from models.state import State
+from models.user import User
+from models.base_model import BaseModel
+import models
 
 
 class FileStorage:
@@ -10,18 +18,18 @@ class FileStorage:
 
     def all(self, cls=None):
         """Returns a dictionary of models in storage"""
-        if cls is not None:
-            result = {}
-            for key, value in FileStorage.__objects.items():
-                if key[:key.index('.')] == cls.__name__:
-                    result[key] = value
-            return result
-        else:
+        if not cls:
             return FileStorage.__objects
+        else:
+            newdict = {}
+            for key, value in self.__objects.items():
+                if type(value) == cls:
+                    newdict[key] = value
+            return newdict
 
     def new(self, obj):
         """Adds new object to storage dictionary"""
-        self.all().update({obj.to_dict()['__class__'] + '.' + obj.id: obj})
+        self.__objects["{}.{}".format(type(obj).__name__, obj.id)] = obj
 
     def save(self):
         """Saves storage dictionary to file"""
@@ -41,29 +49,21 @@ class FileStorage:
         from models.city import City
         from models.amenity import Amenity
         from models.review import Review
-
-        classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
         try:
-            temp = {}
-            with open(FileStorage.__file_path, 'r') as f:
-                temp = json.load(f)
-                for key, val in temp.items():
-                    self.all()[key] = classes[val['__class__']](**val)
+            with open(FileStorage.__file_path, "r", encoding="UTF8") as fd:
+                for val in json.load(fd).values():
+                    class_name = val["__class__"]
+                    del val["__class__"]
+                    self.new(eval(class_name)(**val))
         except FileNotFoundError:
             pass
 
     def delete(self, obj=None):
         """Delete obj from objects"""
-        if obj is not None:
-            for key in list(FileStorage.__objects.keys()):
-                if FileStorage.__objects[key] == obj:
-                    del FileStorage.__objects[key]
-        else:
-            pass
+        if obj:
+            key = obj.__class__.__name__ + '.' + obj.id
+            if key in self.__objects:
+                del self.__objects[key]
 
     def close(self):
         """call the reload method"""
