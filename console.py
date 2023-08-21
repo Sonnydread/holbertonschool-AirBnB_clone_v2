@@ -20,16 +20,16 @@ class HBNBCommand(cmd.Cmd):
     prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
 
     classes = {
-               'BaseModel': BaseModel, 'User': User, 'Place': Place,
-               'State': State, 'City': City, 'Amenity': Amenity,
-               'Review': Review
-              }
+        'BaseModel': BaseModel, 'User': User, 'Place': Place,
+        'State': State, 'City': City, 'Amenity': Amenity,
+        'Review': Review
+    }
     dot_cmds = ['all', 'count', 'show', 'destroy', 'update']
     types = {
-             'number_rooms': int, 'number_bathrooms': int,
-             'max_guest': int, 'price_by_night': int,
-             'latitude': float, 'longitude': float
-            }
+        'number_rooms': int, 'number_bathrooms': int,
+        'max_guest': int, 'price_by_night': int,
+        'latitude': float, 'longitude': float
+    }
 
     def preloop(self):
         """Prints if isatty is false"""
@@ -74,18 +74,18 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is '}'
-                    and type(eval(pline)) is dict:
+                    if pline[0] == '{' and pline[-1] == '}'\
+                            and type(eval(pline)) is dict:
                         _args = pline
                     else:
                         _args = pline.replace(',', '')
                         # _args = _args.replace('\"', '')
                 line = ' '.join([_cmd, _cls, _id, _args])
 
-            except Exception as mess:
-                pass
-            finally:
-                return line
+        except Exception as mess:
+            pass
+        finally:
+            return line
 
     def postcmd(self, stop, line):
         """Prints if isatty is false"""
@@ -139,11 +139,11 @@ class HBNBCommand(cmd.Cmd):
 
             # Make a dictionary with @values
             attrs = {
-                        el[0]: el[1] for el in [
-                                val.split("=") for val in values
-                                ]
-                        if el[0] in class_attrs
-                    }
+                el[0]: el[1] for el in [
+                    val.split("=") for val in values
+                ]
+                if el[0] in class_attrs
+            }
             for k, v in attrs.items():
                 if v[0] == "\"":
                     if "_" in v:
@@ -233,7 +233,7 @@ class HBNBCommand(cmd.Cmd):
         key = c_name + "." + c_id
 
         try:
-            del(storage.all()[key])
+            del (storage.all()[key])
             storage.save()
         except KeyError:
             print("** no instance found **")
@@ -323,7 +323,7 @@ class HBNBCommand(cmd.Cmd):
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] is '\"':  # check for quoted arg
+            if args and args[0] == '\"':  # check for quoted arg
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -371,5 +371,6 @@ class HBNBCommand(cmd.Cmd):
             print("Updates an object with new information")
             print("Usage: update <className> <id> <attName> <attVal>\n")
 
-    if __name__ == "__main__":
-        HBNBCommand().cmdloop()
+
+if __name__ == "__main__":
+    HBNBCommand().cmdloop()
