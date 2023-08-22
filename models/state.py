@@ -5,18 +5,21 @@ from models.city import City
 from sqlalchemy import Column, String, ForeignKey
 from models.base_model import BaseModel, Base
 from sqlalchemy.orm import relationship
-import models
 from os import getenv
 
 
-class State(BaseModel, Base):
-    """ State class """
-    __tablename__ = 'states'
-    name = Column(String(128), nullable=False)
-    cities = relationship("City",
+if getenv('HBNB_TYPE_STORAGE') == "db":
+    class State(BaseModel, Base):
+        """ State class """
+        __tablename__ = 'states'
+        name = Column(String(128), nullable=False)
+        cities = relationship("City",
                           backref="state", cascade="all, delete,delete-orphan")
-
-    if getenv('HBNB_TYPE_STORAGE') != "db":
+else:
+    class State(BaseModel):
+        """ State class """
+        name = ""
+    
         @property
         def cities(self):
             """return city to state"""
