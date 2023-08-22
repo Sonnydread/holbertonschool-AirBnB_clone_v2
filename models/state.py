@@ -14,12 +14,13 @@ if getenv('HBNB_TYPE_STORAGE') == "db":
         __tablename__ = 'states'
         name = Column(String(128), nullable=False)
         cities = relationship("City",
-                          backref="state", cascade="all, delete,delete-orphan")
+                              backref="state",
+                              cascade="all, delete,delete-orphan")
 else:
     class State(BaseModel):
         """ State class """
         name = ""
-    
+
         @property
         def cities(self):
             """return city to state"""
