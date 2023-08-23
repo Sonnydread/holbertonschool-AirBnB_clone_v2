@@ -2,7 +2,6 @@
 """Flask web appl"""
 from flask import Flask, render_template
 from models import storage
-from models.city import City
 from models.state import State
 
 app = Flask(__name__)
@@ -10,13 +9,15 @@ app = Flask(__name__)
 
 @app.route("/states", strict_slashes=False)
 def states():
+    """list of states"""
     return render_template("9-states.html",
                            data1=storage.all(State),
                            data3=None)
 
 
 @app.route("/states/<id>", strict_slashes=False)
-def states(id):
+def statesoflist(id):
+    """list of cities"""
     return render_template("9-states.html",
                            data1=storage.all(State),
                            data2=storage.all(City),
